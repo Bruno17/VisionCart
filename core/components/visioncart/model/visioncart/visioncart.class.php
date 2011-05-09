@@ -431,34 +431,46 @@ class VisionCart {
      * @return string The value of the config key
      */
     public function getShop($config=array()) {
-    	$config['type'] = $this->modx->getOption('type', $config, 'id');
-    	$config['value'] = $this->modx->getOption('value', $config, false);
-    	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
-    	$config['hideInactive'] = $this->modx->getOption('hideInactive', $config, true);
+    	static $shops;
     	
-    	if ($config['value'] == false) {
-    		if (!isset($this->router['shop'])) {
-    			return false;
-    		}
-    		
-    		$config['type'] = 'alias';
-    		$config['value'] = $this->router['shop'];
+    	if (!isset($shops)) {
+    		$shops = array();	
     	}
     	
-    	$shop = $this->modx->getObject('vcShop', array(
-			$config['type'] => $config['value'],
-			'active' => ($config['hideInactive'] != false) ? 1 : 0
-		));
-		
-    	if ($shop == null) {
-    		return false;
+    	$configHash = sha1(implode('', $config));
+    	if (!isset($shops[$configHash])) {
+	    	$config['type'] = $this->modx->getOption('type', $config, 'id');
+	    	$config['value'] = $this->modx->getOption('value', $config, false);
+	    	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
+	    	$config['hideInactive'] = $this->modx->getOption('hideInactive', $config, true);
+	    	
+	    	if ($config['value'] == false) {
+	    		if (!isset($this->router['shop'])) {
+	    			return false;
+	    		}
+	    		
+	    		$config['type'] = 'alias';
+	    		$config['value'] = $this->router['shop'];
+	    	}
+	    	
+	    	$shop = $this->modx->getObject('vcShop', array(
+				$config['type'] => $config['value'],
+				'active' => ($config['hideInactive'] != false) ? 1 : 0
+			));
+			
+	    	if ($shop == null) {
+	    		return false;
+	    	}
+	    	
+	    	if ($config['asArray'] == true) {
+	    		$shops[$configHash] = $shop->toArray();
+	    	} else {
+	    		$shops[$configHash] = $shop;	
+	    	}
     	}
+
     	
-    	if ($config['asArray'] == true) {
-    		return $shop->toArray();
-    	}
-    	
-    	return $shop;
+    	return $shops[$configHash];
     }
     
     /**
@@ -470,20 +482,30 @@ class VisionCart {
      * @return string The value of the config key
      */
     public function getShopSetting($key, $shopId=null) {
-    	if (!isset($shopId)) {
-    		$shop = $this->shop;	
-    	} else {
-    		$shop = $this->modx->getObject('vcShop', $shopId);
+    	static $staticConfig;
+    	
+    	if (!isset($staticConfig)) {
+    		$staticConfig = array();	
     	}
     	
-    	if ($shop == null) {
-    		return false;	
+    	if (!isset($staticConfig[$shopId])) {
+	    	if (!isset($shopId)) {
+	    		$shop = $this->shop;	
+	    	} else {
+	    		$shop = $this->modx->getObject('vcShop', $shopId);
+	    	}
+	    	
+	    	if ($shop == null) {
+	    		return false;	
+	    	}
+	    	
+	    	$config = $shop->get('config');
+	    	
+	    	$staticConfig[$shopId] = $config;
     	}
     	
-    	$config = $shop->get('config');
-    	
-    	if (isset($config[$key])) {
-    		return $config[$key];	
+    	if (isset($staticConfig[$shopId][$key])) {
+    		return $staticConfig[$shopId][$key];	
     	}
     	
     	return false;
@@ -551,7 +573,7 @@ class VisionCart {
 				$this->deleteCookie($basketName);
 			} else {  
 				// Only return it if the basket is new
-				if ($basket->get('status') == -1) {
+				if ($basket->get('status') < 3) {
 					if (($this->modx->user->get('id') == $basket->get('userid') || $basket->get('userid') == 0) || $this->modx->context->get('key') == 'mgr') {
 						return $basket;	
 					}
@@ -1138,49 +1160,56 @@ class VisionCart {
      * @return array The categories
      */
     private function _categoryUltimateParent($config=array()) {
-    	$array = array();
+    	static $staticCategories;
     	
-    	$config['parent'] = $this->modx->getOption('parent', $config, 0);
-    	$config['queryAnd'] = $this->modx->getOption('queryAnd', $config, array());
-    	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
-    	$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
-    	
-    	if ($config['shopId'] == 0) {
-    		$shop = $this->getShop();
-    		
-    		if ($shop == null) {
-    			return false;
-    		}
-    		
-    		$config['shopId'] = $shop->get('id');
-    		unset($shop);
-    	}
-    	
-    	$query = $this->modx->newQuery('vcCategory');
-    	$query->where(array(
-			'id' => $config['parent']
-		));
-		
-		if (!empty($config['queryAnd'])) {
-			$query->andCondition($config['queryAnd']);
-		}
-		
-		$category = $this->modx->getObject('vcCategory', $query);
-    	
-    	if ($category != null) {
-    		if ($config['asArray'] == true) {
- 				$array[] = $category->toArray();
-    		} else {
-    			$array[] = $category;
-   			}
-   			
-   			if ($category->get('parent') != 0) {
-				$config['parent'] = $category->get('parent');
-				$array = array_merge($array, $this->_categoryUltimateParent($config));
+    	$configHash = sha1(implode('', $config));
+    	if (!isset($staticCategories[$configHash])) {
+	    	$array = array();
+	    	
+	    	$config['parent'] = $this->modx->getOption('parent', $config, 0);
+	    	$config['queryAnd'] = $this->modx->getOption('queryAnd', $config, array());
+	    	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
+	    	$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
+	    	
+	    	if ($config['shopId'] == 0) {
+	    		$shop = $this->getShop();
+	    		
+	    		if ($shop == null) {
+	    			return false;
+	    		}
+	    		
+	    		$config['shopId'] = $shop->get('id');
+	    		unset($shop);
+	    	}
+	    	
+	    	$query = $this->modx->newQuery('vcCategory');
+	    	$query->where(array(
+				'id' => $config['parent']
+			));
+			
+			if (!empty($config['queryAnd'])) {
+				$query->andCondition($config['queryAnd']);
 			}
+			
+			$category = $this->modx->getObject('vcCategory', $query);
+	    	
+	    	if ($category != null) {
+	    		if ($config['asArray'] == true) {
+	 				$array[] = $category->toArray();
+	    		} else {
+	    			$array[] = $category;
+	   			}
+	   			
+	   			if ($category->get('parent') != 0) {
+					$config['parent'] = $category->get('parent');
+					$array = array_merge($array, $this->_categoryUltimateParent($config));
+				}
+	    	}
+	    	
+	    	$staticCategories[$configHash] = $array;
     	}
         
-        return $array;
+        return $staticCategories[$configHash];
     }
     
     /**
@@ -2077,6 +2106,8 @@ class VisionCart {
      * @return string The processed content
      */
     public function makeUrl($config=array()) {
+    	static $staticShops;
+    	
         if (empty($config)) {
             return false;
         }
@@ -2097,10 +2128,15 @@ class VisionCart {
         
         // If the config shopId has been set and is numeric, (re)fetch the current shop by Id
         if (!isset($shop) && isset($config['shopId']) && is_numeric($config['shopId'])) {
-        	$shop = $this->getShop(array(
-	 			'type' => 'id',
-	 			'value' => $config['shopId']
-			));
+        	if (!isset($staticShops[$config['shopId']])) {
+	        	$shop = $this->getShop(array(
+		 			'type' => 'id',
+		 			'value' => $config['shopId']
+				));
+				$staticShops[$config['shopId']] = $shop;
+        	} else {
+        		$shop = $staticShops[$config['shopId']];	
+        	}
         }
         
         if (!isset($config['scheme']) || !in_array($config['scheme'], array(-1, 'full', 'http', 'https'))) {
@@ -2166,6 +2202,9 @@ class VisionCart {
      * @return string Processed wayFinder list
      */
     public function wayFinder($scriptProperties=array(), $config=array()) {
+    	static $configFile;
+    	static $staticShop;
+    	
     	$output = array(
     		'master' => '', 
     		'return' => '',
@@ -2193,7 +2232,7 @@ class VisionCart {
  		$config['categorySortBy'] = $this->modx->getOption('categorySortBy', $config, 'sort');
  		$config['internalDepth'] = $this->modx->getOption('internalDepth', $config, 0);
  		$config['internalLimit'] = $this->modx->getOption('internalLimit', $config, 0);
- 		$config['showProducts'] = $this->modx->getOption('showProducts', $config, 1);
+ 		$config['showProducts'] = $this->modx->getOption('showProducts', $config, 0);
  		$config['excludeCategories'] = $this->modx->getOption('excludeCategories', $config, '');
 
  		// Template
@@ -2221,7 +2260,7 @@ class VisionCart {
 		
  		$config['firstClassFlag'] = false;
  		$config['internalItemCount'] = 1;
-
+ 		
 	 	if ($config['shopId'] == 0) {
  			$shop = $this->getShop();
  			
@@ -2232,13 +2271,19 @@ class VisionCart {
 			$config['shopId'] = $shop->get('id');
 			unset($shop);
  		}
-
- 		// Set tax category	
- 		$config['taxCategory'] = $this->modx->getOption('taxCategory', $config, $this->getShopSetting('taxesCategory', $config['shopId']));
  		
- 		$config = array_merge($config, $this->getConfigFile($config['shopId'], 'wayFinder', null, array(
-			'config' => $config['config']
-	 	)), $scriptProperties);
+ 		// Set tax category	
+ 		if (!isset($config['taxCategory'])) {
+ 			$config['taxCategory'] = $this->modx->getOption('taxCategory', $config, $this->getShopSetting('taxesCategory', $config['shopId']));
+ 		}
+ 		
+ 		if (!isset($configFile)) {
+ 			$configFile = $this->getConfigFile($config['shopId'], 'wayFinder', null, array(
+				'config' => $config['config']
+		 	));
+ 		}
+ 		
+ 		$config = array_merge($config, $configFile, $scriptProperties);
  		
  		$query = $this->modx->newQuery('vcCategory');
  		$query->where(array(
@@ -2287,7 +2332,6 @@ class VisionCart {
  				$config['firstClassFlag'] = true;
  			}
  			
- 			//if (isset($config['lastItem']) && $config['lastItem'] == $category) {
 			if (count($categories) == $config['internalItemCount']) {
  				$classes .= $config['lastCategoryClass'].' ';
  				if ($config['lastCategoryTpl'] != '') {
@@ -2338,8 +2382,8 @@ class VisionCart {
 	 				'shopId' => $config['shopId'],
 	 				'hideInactive' => $config['hideInactive']
 	 			));
-	 			//$product['data'] = $products;
-				 $products = $products['data']; 			
+	 			
+				$products = $products['data']; 			
  			}
 
  			// Overwrite config
@@ -2938,7 +2982,7 @@ class VisionCart {
 	    			$highestTax = $taxCategory;	
 	    		}
 	    		
-	    		$productPrice = $this->calculateProductPrice($product, true);
+	    		$productPrice = $this->calculateProductPrice($productObject, true);
 	    		$shippingPrice = $productObject->get('shippingprice');
 	    		$amounts['totalProductsPriceIn'] += ($productPrice['in'] * $product['quantity']);
 	    		$amounts['totalProductsPriceEx'] += ($productPrice['ex'] * $product['quantity']);
@@ -3055,13 +3099,39 @@ class VisionCart {
      * @param bool $asArray Return multidimensional array containing more info
      * @return array The product price (from the cheapest category)
      */
-    public function calculateProductPrice($product, $asArray=false) {
+    public function calculateProductPrice($product, $asArray=false, $cached=true) {
+    	static $productPrices;
+    	
+    	if (!isset($productPrices)) {
+    		$productPrices = array();	
+    	}
+    	
     	$quantity = null;
+    	$originalProductArray = $product;
     	if (is_array($product) && isset($product['quantity'])) {
     		$quantity = $product['quantity'];
+    		
+    		// Check for static prices
+    		if (isset($productPrices['quantity'][$product['id']][$quantity]) && $cached) {
+    			if ($asArray) {
+    				return $productPrices['quantity'][$product['id']][$quantity]['asArray'];	
+    			} else {
+    				return $productPrices['quantity'][$product['id']][$quantity]['normal'];	
+    			}
+    		}
     	}
     	
     	if (is_array($product) && isset($product['id'])) {
+    		// Check for static prices
+    		if (isset($productPrices[$product['id']]) && $cached) {
+     			if ($asArray) {
+    				return $productPrices[$product['id']]['asArray'];	
+    			} else {
+    				return $productPrices[$product['id']]['normal'];	
+    			}
+    		}
+    		
+    		// Fetch product object
     		$product = $this->modx->getObject('vcProduct', $product['id']);
     	}
     	
@@ -3069,6 +3139,15 @@ class VisionCart {
     		return false;	
     	}
     	
+    	// Check for static prices
+		if (isset($productPrices[$product->get('id')]) && $cached) {
+ 			if ($asArray) {
+				return $productPrices[$product->get('id')]['asArray'];	
+			} else {
+				return $productPrices[$product->get('id')]['normal'];	
+			}
+		}
+		
     	if ($asArray) {
     		$productArray = array();
     	}	
@@ -3083,7 +3162,8 @@ class VisionCart {
     	
     	$this->fireEvent('vcCalculateProductPrice', 'onBeforeCalculate', array(
     		'product' => &$product,
-    		'asArray' => $asArray
+    		'asArray' => $asArray,
+    		'originalProduct' => $originalProductArray,
     	));
     	
     	$productHasTier = false;
@@ -3185,6 +3265,7 @@ class VisionCart {
     	
     	$this->fireEvent('vcCalculateProductPrice', 'onAfterCalculate', array(
     		'product' => &$product,
+    		'originalProduct' => $originalProductArray,
     		'asArray' => $asArray
     	));
 
@@ -3192,6 +3273,20 @@ class VisionCart {
     	$taxCategory = $product->getOne('TaxCategory');
     	$taxAmount = ($product->get('price') / 100) * abs($taxCategory->get('pricechange'));
     	$totalAmount = number_format(($product->get('price') + $taxAmount), 2, '.', '');
+    	
+    	if (isset($quantity)) {
+    		$productPrices['quantity'][$product->get('id')][$quantity]['asArray'] = array(
+    			'ex' => $product->get('price'),
+    			'in' => $totalAmount
+    		);
+    		$productPrices['quantity'][$product->get('id')][$quantity]['normal'] = $totalAmount;
+    	} else {
+    		$productPrices[$product->get('id')]['asArray'] = array(
+    			'ex' => $product->get('price'),
+    			'in' => $totalAmount
+    		);
+    		$productPrices[$product->get('id')]['normal'] = $totalAmount;
+    	}
     	
     	if ($asArray) {
     		$productArray['ex'] = $product->get('price');
@@ -3257,7 +3352,7 @@ class VisionCart {
     	$output = array('<br />', '<hr />');
     	$content = str_replace($input, $output, $content);
     	
-    	$content = strip_tags($content, '<a><b><i><u><h1><h2><h3><h4><h5><p><pre><div><br>');
+    	$content = strip_tags($content, '<a><b><i><u><h1><h2><h3><h4><h5><p><pre><div><br><ul><li><ol>');
     	
     	return $content;
     }
