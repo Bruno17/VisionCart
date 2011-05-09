@@ -15,7 +15,7 @@ $params = array();
  *	Settings
  **/
 
-$params['showProducts'] = 1;
+$params['showProducts'] = 0; // This has kind off a performance impact ;)
 
 /**
  *	Category

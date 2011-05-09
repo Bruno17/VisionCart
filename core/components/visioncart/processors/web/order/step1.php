@@ -2,6 +2,7 @@
 
 $vc =& $modx->visioncart;
 $order = $vc->getBasket();
+
 $vc->calculateOrderPrice($order);
 $order->set('ordertime', time());
 $order->save();
@@ -48,7 +49,7 @@ foreach($chunkArray as $key => $value) {
 	}
 }
 
-if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($order->get('basket')) == 0 || $order->get('status') > 0)) {
+if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($order->get('basket')) == 0 || $order->get('status') > 2)) {
 	$content = $vc->parseChunk($chunkArray['vcOrderBasketEmpty'], array(
 		'nextStep' => $nextStep,
 		'orderAmountMet' => $orderAmountMet

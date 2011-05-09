@@ -7,7 +7,7 @@ $order = $vc->getBasket();
 if (!$modx->user->isAuthenticated()) {
 	$modx->sendUnauthorizedPage();	
 	exit();
-} elseif ($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($order->get('basket')) == 0 || $order->get('status') > 0) {
+} elseif ($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($order->get('basket')) == 0 || $order->get('status') > 2) {
 	$modx->sendRedirect($modx->makeUrl($modx->resource->get('id'), '', 'step=1'));
 	exit();
 }

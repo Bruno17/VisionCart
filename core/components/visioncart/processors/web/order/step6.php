@@ -55,7 +55,7 @@ if ($paymentModule != null) {
 			$returnValue = include($controller);	
 			
 			if (!is_array($returnValue)) {
-				$returnValue = array();	
+				$returnValue = array();	 
 			}
 		}
 	}
@@ -63,13 +63,7 @@ if ($paymentModule != null) {
 	$paymentData = $order->get('paymentdata');
 	$paymentData = array_merge($paymentData, $returnValue);
 	$order->set('paymentdata', $paymentData);
-	$order->set('basketid', '');
 	$order->save();
-	
-	// Because the order is done we will clear the cart and the cookie as well, this will unlink the basket cookie from the order
-	// so the user can start creating a new one if they wish
-	$vc->clearBasket();
-	unset($_SESSION['vc-order-step']);
 	
 	if (isset($returnValue['returnUrl'])) {
 		$modx->sendRedirect($returnValue['returnUrl']);	
