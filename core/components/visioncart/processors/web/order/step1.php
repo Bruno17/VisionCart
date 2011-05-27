@@ -8,7 +8,6 @@ $order->set('ordertime', time());
 $order->save();
 
 $content = '';
-$basket = $order->get('basket');
 
 // Init order step variable
 if (!isset($_SESSION['vc-order-step'])) {
@@ -20,6 +19,8 @@ if (!isset($_SESSION['vc-order-step'])) {
 $vc->fireEvent('vcEventOrderStep1', '', array(
 	'order' => $order
 ));
+
+$basket = $order->get('basket');
 
 // Get theme configuration
 $scriptProperties['config'] = $modx->getOption('config', $scriptProperties, 'default');

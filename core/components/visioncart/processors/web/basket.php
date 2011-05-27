@@ -93,6 +93,19 @@ if (in_array($scriptProperties['basketAction'], $methods)) {
 					
 					$product['quantity'] = 0;
 					$currentBasket[$productId] = $product;
+                    
+                    // Try to create an URL for the product
+                    if ($vc->category != null) {
+                        $link = $modx->getObject('vcProductCategory', array(
+                            'productid' => $productId,
+                            'categoryid' => $vc->category->get('id')
+                        ));
+                        if ($link != null) {
+                            $currentBasket[$productId]['url'] = $vc->makeUrl(array(
+                                'productCategory' => $link->get('id')
+                            ));
+                        }
+                    }
 				}
 				
 				$currentBasket[$productId]['quantity'] += $quantity;
@@ -102,12 +115,14 @@ if (in_array($scriptProperties['basketAction'], $methods)) {
 			break;
 		case 'update':
 			$currentBasket = array();
+            $basketArray = $basket->get('basket');
+            
 			foreach($products as $productId => $quantity) {
 				$product = $vc->getProduct((int) $productId, array(
 					'asArray' => true
 				));
 				
-				if ($product == null) {
+				if ($product == false) {
 					continue;	
 				}
 				
@@ -117,7 +132,14 @@ if (in_array($scriptProperties['basketAction'], $methods)) {
 					}
 				} else {
 					$product['quantity'] = 0;
-					$currentBasket[$productId] = $product;
+                    
+                    // Merge the current data with the original product
+                    if (isset($basketArray[$productId])) {
+                        $currentBasket[$productId] = array_merge($basketArray[$productId], $product);
+                    } else {
+                        $currentBasket[$productId] = $product;
+                    }
+                    
 					$currentBasket[$productId]['quantity'] = $quantity;
 				}
 			}
