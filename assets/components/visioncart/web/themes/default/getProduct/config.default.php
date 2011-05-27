@@ -27,7 +27,7 @@ $params['tpl'] = '@CODE:<table width="100%">
 					<td>[[+url]]</td>
 				</tr>
 				<tr>
-					<td width="275"><strong>Naam</strong></td>
+					<td width="275"><strong>Name</strong></td>
 					<td>[[+name]]</td>
 				</tr>
 				<tr>
@@ -44,7 +44,7 @@ $params['tpl'] = '@CODE:<table width="100%">
 				</tr>
 				<tr>
 					<td><strong>Price</strong></td>
-					<td>[[+display.price]]</td>
+					<td>[[+display.price.in:vcMoney]]</td>
 				</tr>
 				<tr>
 					<td><strong>Weight</strong></td>
@@ -52,7 +52,7 @@ $params['tpl'] = '@CODE:<table width="100%">
 				</tr>
 				<tr>
 					<td><strong>Shipping price</strong></td>
-					<td>[[+display.shippingprice]]</td>
+					<td>[[+display.shippingprice.in:vcMoney]]</td>
 				</tr>
 				<tr>
 					<td><strong>Eigenschappen</strong></td>
