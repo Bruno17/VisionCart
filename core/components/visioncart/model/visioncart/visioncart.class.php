@@ -129,8 +129,18 @@ class VisionCart {
      */
     public function initialize($context='web', $config=array()) {
         switch ($context) {
-            case 'mgr':
-            	$this->modx->regClientStartupHTMLBlock('<script type="text/javascript">var siteId = \''.$this->modx->site_id.'\';</script>');
+          	case 'mgr':
+			    $version = $this->modx->getVersionData();
+			    if (version_compare($version['full_version'],'2.1.1-pl') >= 0) {
+			        if ($this->modx->user->hasSessionContext($this->modx->context->get('key'))) {
+			        	$this->modx->regClientStartupHTMLBlock('<script type="text/javascript">var siteId = \''.$_SESSION["modx.{$this->modx->context->get('key')}.user.token"].'\';</script>');
+			        } else {
+			            $_SESSION["modx.{$this->modx->context->get('key')}.user.token"] = 0;
+			        }
+			    } else {
+			        $this->modx->regClientStartupHTMLBlock('<script type="text/javascript">var siteId = \''.$this->modx->site_id.'\';</script>');
+			    }
+            	
                 $this->modx->lexicon->load('visioncart:default');
 
                 if (!$this->modx->loadClass('visioncart.request.visionCartControllerRequest', $this->config['modelPath'], true, true)) {
@@ -152,7 +162,7 @@ class VisionCart {
            	default: // Context default
            		if (!empty($this->router)) {
            			return true;
-           		}
+           		} 
            		
            		$config['requestURL'] = $this->modx->getOption('requestURL', $config, $_SERVER['REQUEST_URI']);
            		$config['method'] = $this->modx->getOption('method', $config, 'resource');
@@ -521,7 +531,10 @@ class VisionCart {
      * @return void
      */
     public function setCookie($key, $value, $lifeTime=86400) {
-    	setcookie($key, $value, time()+$lifeTime, '/', '.'.$_SERVER['HTTP_HOST']);
+        $host = explode('.', $_SERVER['HTTP_HOST']);
+        $host = $host[sizeof($host) - 2].'.'.$host[sizeof($host) -1];
+        
+    	setcookie($key, $value, time()+$lifeTime, '/', '.'.$host);
     }
    
     /**

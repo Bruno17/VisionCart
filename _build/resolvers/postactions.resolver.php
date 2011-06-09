@@ -34,7 +34,7 @@ switch ($action) {
 		if (isset($options['send_email']) && $options['send_email'] == '1') {
 			$message = 'VisionCart 0.6.0 RC-3 was installed on '.date('d-m-Y H:i')."\n\n";
 			$message .= 'Domain: '.$_SERVER['HTTP_HOST'];
-			mail('beta@visioncart.net', 'VisionCart 0.6.0 RC-3 installed', $message);	
+			mail('beta@visioncart.net', 'VisionCart 0.6.1 RC-4 installed', $message);	
 		}
 		
 		if ($action == 'install') {
