@@ -1,10 +1,10 @@
 <?php
 
 // See wether the options are passed on by the hook or the scriptProperties (processor)
-if (!isset($options['hook']) || !is_object($options['hook'])) {
+if (!isset($scriptProperties['hook'])) {
 	$values = $scriptProperties;
 } else {
-	$hook =& $options['hook'];
+	$hook =& $scriptProperties['hook'];
 	$values = $hook->getValues();
 }
 
@@ -60,6 +60,7 @@ $profile->fromArray(array(
 $profile->save();
 
 unset($values, $profile, $extended);
-$modx->sendRedirect($modx->makeUrl($modx->resource->get('id'), '', 'step=2'));
+
+$modx->sendRedirect($modx->makeUrl($modx->resource->get('id'), '', 'step=3'));
 exit();
 return '';

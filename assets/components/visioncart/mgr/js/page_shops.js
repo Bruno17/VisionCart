@@ -468,6 +468,12 @@ var vcPageShops = Ext.extend(Ext.Panel, {
 															description: 'If ordering is disabled your webshop becomes a catalogue'
 														},
 														{
+															xtype: 'checkbox',
+															fieldLabel: 'Guest checkout',
+															name: 'enableGuestCheckout',
+															description: 'If this is enabled, users can go past step 1 without logging in'
+														},
+														{
 															xtype: 'textfield',
 															fieldLabel: 'Free shipping boundary*',
 															name: 'freeShippingBoundary',

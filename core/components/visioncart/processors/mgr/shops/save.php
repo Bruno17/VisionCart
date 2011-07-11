@@ -40,7 +40,8 @@ w=250,h=250,prefix=big_'),
 	array('key' => 'decimalSeparator', 'defaultValue' => ','),
 	array('key' => 'thousandsSeparator', 'defaultValue' => ','),
 	array('key' => 'calculateShippingTaxes', 'defaultValue' => 1),
-	array('key' => 'calculatePaymentTaxes', 'defaultValue' => 0)
+	array('key' => 'calculatePaymentTaxes', 'defaultValue' => 0),
+	array('key' => 'enableGuestCheckout', 'defaultValue' => false)
 );
 
 // Check if payment options have been edited (and convert to array)

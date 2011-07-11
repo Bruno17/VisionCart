@@ -70,7 +70,8 @@ if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($
 	$content = $vc->parseChunk($chunkArray['vcBasketWrapper'], array(
 		'content' => $content,
 		'nextStep' => $nextStep,
-		'orderAmountMet' => $orderAmountMet
+		'orderAmountMet' => $orderAmountMet,
+		'order' => $order
 	), array(
 		'isChunk' => true
 	));
