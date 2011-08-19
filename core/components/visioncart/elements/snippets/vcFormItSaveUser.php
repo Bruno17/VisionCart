@@ -5,10 +5,9 @@
 
 $vc =& $modx->visioncart;
 
-$processor = $modx->runProcessor('user/update', array(), array(
+$processor = $modx->runProcessor('user/update', $scriptProperties, array(
 	'location' => 'web',
 	'processors_path' => $vc->config['processorsPath'],
-	'hook' => &$hook,
 	'scriptProperties' => &$scriptProperties
 ));
 

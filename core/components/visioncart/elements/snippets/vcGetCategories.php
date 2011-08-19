@@ -23,15 +23,18 @@ $scriptProperties['scheme'] = $modx->getOption('scheme', $scriptProperties, -1);
 $scriptProperties['parents'] = explode(',', $scriptProperties['parents']);
 $scriptProperties['exclude'] = explode(',', $scriptProperties['exclude']);
 
+$scriptProperties['sort'] = $modx->getOption('sort', $scriptProperties, 'ASC');
+$scriptProperties['sortBy'] = $modx->getOption('sortBy', $scriptProperties, 'sort');
+
 if ($scriptProperties['tpl'] == '') {
 	return '';
 }
 
 foreach($scriptProperties['parents'] as $parent) {
-	$stack = $vc->getCategories($scriptProperties['shopId'], array(
+	$stack = $vc->getCategories($scriptProperties['shopId'], array_merge($scriptProperties, array(
 		'parent' => (int) $parent,
 		'asArray' => true
-	));
+	)));
 	
 	foreach($stack as $category) {
 		if (!in_array($category['id'], $scriptProperties['exclude'])) {

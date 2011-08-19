@@ -45,18 +45,10 @@ $product->set('display', array(
 	'shippingprice' => $vc->money($product->get('shippingprice'), array('shopId' => $product->get('shopid')))
 ));
 
+
+
 if (isset($scriptProperties['id'])) {
-	foreach($product->toArray() as $key => $value) {
-		if ($key == 'customfields') {
-			foreach($value as $categoryId => $categoryValues) {
-				foreach($categoryValues as $categoryKey => $categoryValue) {
-					$modx->setPlaceholder('vc.product.customfields.'.$categoryId.'.'.$categoryKey, $categoryValue);	
-				}
-			}	
-		} else {
-			$modx->toPlaceholder('vc.product.'.$key, $value);	
-		}
-	}
+    $modx->toPlaceholders($product->toArray(), 'vc.product');
 }
 
 if ($scriptProperties['tpl'] != '') { 

@@ -53,8 +53,9 @@ foreach($chunkArray as $key => $value) {
 if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($order->get('basket')) == 0 || $order->get('status') > 2)) {
 	$content = $vc->parseChunk($chunkArray['vcOrderBasketEmpty'], array(
 		'nextStep' => $nextStep,
-		'orderAmountMet' => $orderAmountMet
-	), array(
+		'orderAmountMet' => $orderAmountMet,
+		'order' => $order->toArray()
+	), array( 
 		'isChunk' => true
 	));
 } else {
@@ -71,7 +72,7 @@ if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($
 		'content' => $content,
 		'nextStep' => $nextStep,
 		'orderAmountMet' => $orderAmountMet,
-		'order' => $order
+		'order' => $order->toArray()
 	), array(
 		'isChunk' => true
 	));
@@ -80,7 +81,8 @@ if (($order->get('basket') == '' || !is_array($order->get('basket')) || sizeof($
 return $vc->parseChunk($chunkArray['vcOrderStep1'], array(
 	'content' => $content,
 	'action' => $modx->makeUrl($modx->resource->get('id'), '', 'step=2'),
-	'orderAmountMet' => $orderAmountMet
+	'orderAmountMet' => $orderAmountMet,
+	'order' => $order->toArray()
 ), array(
 	'isChunk' => true
 ));

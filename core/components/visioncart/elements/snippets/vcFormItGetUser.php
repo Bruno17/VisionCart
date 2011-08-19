@@ -4,7 +4,6 @@
  */
 
 if (!$modx->user->isAuthenticated()) {
-	$modx->sendUnauthorizedPage();
 	return '';
 }
 $profile = $modx->user->getOne('Profile');
