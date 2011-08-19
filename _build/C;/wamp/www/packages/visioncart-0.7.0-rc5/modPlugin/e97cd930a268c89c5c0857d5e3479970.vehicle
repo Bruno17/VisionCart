@@ -1,0 +1,111 @@
+<?php return array (
+  'unique_key' => 'name',
+  'preserve_keys' => false,
+  'update_object' => true,
+  'related_objects' => 
+  array (
+    'PluginEvents' => 
+    array (
+      '76b15d7e2bff6ae5bdcf7ba0bd287d16' => 
+      array (
+        'preserve_keys' => true,
+        'update_object' => true,
+        'unique_key' => 
+        array (
+          0 => 'pluginid',
+          1 => 'event',
+        ),
+        'class' => 'modPluginEvent',
+        'object' => '{"pluginid":1,"event":"OnBeforeCacheUpdate","priority":0,"propertyset":0}',
+        'guid' => 'd083241ef09f3988a855301dcab33681',
+        'native_key' => 
+        array (
+          0 => 1,
+          1 => 'OnBeforeCacheUpdate',
+        ),
+        'signature' => '2e1f25532d0ff7f2f12b7ee38330584d',
+      ),
+      'e5630583be7b8abf89bf13f5452f22ad' => 
+      array (
+        'preserve_keys' => true,
+        'update_object' => true,
+        'unique_key' => 
+        array (
+          0 => 'pluginid',
+          1 => 'event',
+        ),
+        'class' => 'modPluginEvent',
+        'object' => '{"pluginid":1,"event":"OnLoadWebDocument","priority":0,"propertyset":0}',
+        'guid' => '1c2abd6f2af1e2e3eaf340f9c197e87a',
+        'native_key' => 
+        array (
+          0 => 1,
+          1 => 'OnLoadWebDocument',
+        ),
+        'signature' => 'dfd9ac1ad4e36964231a7c415a823d94',
+      ),
+      '06ffff7df9e35de1c4826b8906bd14c4' => 
+      array (
+        'preserve_keys' => true,
+        'update_object' => true,
+        'unique_key' => 
+        array (
+          0 => 'pluginid',
+          1 => 'event',
+        ),
+        'class' => 'modPluginEvent',
+        'object' => '{"pluginid":1,"event":"OnPageNotFound","priority":1,"propertyset":0}',
+        'guid' => '327228aca548ce2077a003ca59d4967a',
+        'native_key' => 
+        array (
+          0 => 1,
+          1 => 'OnPageNotFound',
+        ),
+        'signature' => '00da1832f5d8dcab2a68fd4e9a482ab5',
+      ),
+      'e20ef653a4cb506bae187c6d450c18e3' => 
+      array (
+        'preserve_keys' => true,
+        'update_object' => true,
+        'unique_key' => 
+        array (
+          0 => 'pluginid',
+          1 => 'event',
+        ),
+        'class' => 'modPluginEvent',
+        'object' => '{"pluginid":1,"event":"OnWebPageInit","priority":2,"propertyset":0}',
+        'guid' => 'c7b6e18711a8ac58c6e5d86a36b95028',
+        'native_key' => 
+        array (
+          0 => 1,
+          1 => 'OnWebPageInit',
+        ),
+        'signature' => 'a7c70f22139d51f4317b845a0231d359',
+      ),
+    ),
+  ),
+  'related_object_attributes' => 
+  array (
+    'PluginEvents' => 
+    array (
+      'preserve_keys' => true,
+      'update_object' => true,
+      'unique_key' => 
+      array (
+        0 => 'pluginid',
+        1 => 'event',
+      ),
+    ),
+  ),
+  'namespace' => 'visioncart',
+  'resolve' => NULL,
+  'validate' => NULL,
+  'vehicle_package' => 'transport',
+  'vehicle_class' => 'xPDOObjectVehicle',
+  'guid' => 'c7af2934fbed10d25c594fed18b28737',
+  'package' => 'modx',
+  'class' => 'modPlugin',
+  'signature' => 'e97cd930a268c89c5c0857d5e3479970',
+  'native_key' => 1,
+  'object' => '{"id":1,"name":"vcInit","description":"","editor_type":0,"category":0,"cache_type":0,"plugincode":"\\/**\\n * @package visioncart\\n *\\/\\n\\nif ($modx->context->get(\'key\') == \'mgr\') {\\n\\tswitch((string) $modx->event->name) {\\n\\t\\tcase \'OnBeforeCacheUpdate\':\\n\\t\\t\\t$modx->cacheManager->refresh(array(\\n\\t\\t\\t\\t\'visioncart\' => array(\\n\\t\\t\\t\\t\\t\'.php\'\\n\\t\\t\\t\\t)\\n\\t\\t\\t));\\n\\t\\t\\tbreak;\\n\\t}\\n\\treturn false;\\n}\\n\\nswitch((string) $modx->event->name) {\\n\\tcase \'OnWebPageInit\':\\n\\t\\t$corePath = $modx->getOption(\'visioncart.core_path\', null, $modx->getOption(\'core_path\', null, MODX_CORE_PATH));\\n\\t\\t$modx->addPackage(\'visioncart\', $corePath.\'components\\/visioncart\\/model\\/\');\\n\\t\\t$modx->visioncart = $modx->getService(\'visioncart\', \'VisionCart\', $corePath.\'components\\/visioncart\\/model\\/visioncart\\/\', array(\\n\\t\\t\\t\'method\' => (string) (isset($_REQUEST[\'method\']) && $_REQUEST[\'method\'] != \'\') ? strtolower($_REQUEST[\'method\']) : \'resource\',\\n\\t\\t\\t\'initialize\' => \'plugin\',\\n\\t\\t\\t\'context\' => (string) $modx->context->get(\'key\'),\\n\\t\\t\\t\'event\' => (string) $modx->event->name\\n\\t\\t));\\n\\t\\tbreak;\\n\\tcase \'OnPageNotFound\':\\n\\t\\t$modx->visioncart->route(array(\\n\\t\\t\\t\'method\' => (string) (isset($_REQUEST[\'method\']) && $_REQUEST[\'method\'] != \'\') ? strtolower($_REQUEST[\'method\']) : \'resource\',\\n\\t\\t\\t\'initialize\' => \'plugin\',\\n\\t\\t\\t\'context\' => (string) $modx->context->get(\'key\'),\\n\\t\\t\\t\'event\' => (string) $modx->event->name\\n\\t\\t));\\n\\t\\tbreak;\\n\\tcase \'OnLoadWebDocument\':\\n\\t\\t$modx->visioncart->assign(array(\\n\\t\\t\\t\'method\' => (string) (isset($_REQUEST[\'method\']) && $_REQUEST[\'method\'] != \'\') ? strtolower($_REQUEST[\'method\']) : \'resource\',\\n\\t\\t\\t\'initialize\' => \'plugin\',\\n\\t\\t\\t\'context\' => (string) $modx->context->get(\'key\'),\\n\\t\\t\\t\'event\' => (string) $modx->event->name\\n\\t\\t));\\n\\t\\tbreak;\\n\\tdefault:\\n\\t\\t\\/\\/exit($modx->event->name);\\n\\t\\tbreak;\\n}","locked":0,"properties":"a:0:{}","disabled":0,"moduleguid":""}',
+);

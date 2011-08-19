@@ -1,0 +1,50 @@
+<?php return array (
+  'preserve_keys' => true,
+  'update_object' => true,
+  'unique_key' => 'text',
+  'related_objects' => 
+  array (
+    'Action' => 
+    array (
+      'bfeb8f721094704f69ec8cf63ae2f4a0' => 
+      array (
+        'preserve_keys' => false,
+        'update_object' => true,
+        'unique_key' => 
+        array (
+          0 => 'namespace',
+          1 => 'controller',
+        ),
+        'class' => 'modAction',
+        'object' => '{"id":1,"namespace":"visioncart","parent":0,"controller":"index","haslayout":1,"lang_topics":"visioncart:default","assets":"","help_url":""}',
+        'guid' => '580af0eede9ed9ece5fc2deff4bb7656',
+        'native_key' => 1,
+        'signature' => 'e47460aec453f67ccc67b262ec4bac13',
+      ),
+    ),
+  ),
+  'related_object_attributes' => 
+  array (
+    'Action' => 
+    array (
+      'preserve_keys' => false,
+      'update_object' => true,
+      'unique_key' => 
+      array (
+        0 => 'namespace',
+        1 => 'controller',
+      ),
+    ),
+  ),
+  'namespace' => 'visioncart',
+  'resolve' => NULL,
+  'validate' => NULL,
+  'vehicle_package' => 'transport',
+  'vehicle_class' => 'xPDOObjectVehicle',
+  'guid' => 'c7414d8c3f845138c78355d8607ee2b9',
+  'package' => 'modx',
+  'class' => 'modMenu',
+  'signature' => '5acf2cc5cfb6392db1421066b000c58e',
+  'native_key' => 'menu.visioncart_modules',
+  'object' => '{"text":"menu.visioncart_modules","parent":"menu.visioncart","action":1,"description":"menu.visioncart_modules_desc","icon":"","menuindex":1,"params":"&action=modules","handler":"","permissions":""}',
+);

@@ -1,10 +1,10 @@
 <?php
 /**
- * Quip build script
- *
- * @package quip
- * @subpackage build
- */
+* Quip build script
+*
+* @package quip
+* @subpackage build
+*/
 
 $mtime = microtime();
 $mtime = explode(" ", $mtime);
@@ -40,7 +40,7 @@ $modx->setLogTarget(XPDO_CLI_MODE ? 'ECHO' : 'HTML');
 
 $modx->loadClass('transport.modPackageBuilder','',false, true);
 $builder = new modPackageBuilder($modx);
-$builder->createPackage('visioncart', '0.6.1', 'rc4');
+$builder->createPackage('visioncart', '0.7.0', 'rc5');
 $builder->registerNamespace('visioncart', false, true, '{core_path}components/visioncart/');
  
 // Add system settings
