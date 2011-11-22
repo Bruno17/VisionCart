@@ -1305,14 +1305,14 @@ class VisionCart {
    	}
     
     /**
-     * Get all the products within a category
+     * Get all the products within one or more categories
      *
      * @access public
-     * @param int $categoryId The category id
+     * @param int $categoryIds The category ids
      * @param array $config The configuration array
      * @return array The products
      */
-    public function getProducts($categoryId, $config=array()) {
+    public function getProducts($categoryIds, $config=array()) {
     	$products = array();
 
     	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
@@ -1321,10 +1321,12 @@ class VisionCart {
     	$config['hideSKU'] = $this->modx->getOption('hideSKU', $config, true);
     	$config['sortBy'] = $this->modx->getOption('sortBy', $config, 'ProductCategory.sort');
     	$config['sort'] = $this->modx->getOption('sort', $config, 'ASC');
-    	$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
+    	//$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
     	$config['limit'] = $this->modx->getOption('limit', $config, 0);
     	$config['offset'] = $this->modx->getOption('offset', $config, 0);
+        $config['exclude'] = $this->modx->getOption('exclude', $config, false);
 
+        /* not sure, if we need this shopid
     	if ($config['shopId'] == 0) {
     		$shop = $this->getShop();
     		
@@ -1335,6 +1337,7 @@ class VisionCart {
     		$config['shopId'] = $shop->get('id');
     		unset($shop);
     	}
+        */
     	
         $query = $this->modx->newQuery('vcProduct');
 		$query->innerJoin('vcProductCategory', 'ProductCategory', 'ProductCategory.productid = vcProduct.id');
@@ -1343,14 +1346,24 @@ class VisionCart {
 			'vcProduct.*',
 			'ProductCategory.id AS linkId'
 		));
-		
+        
+        /* do we need to check for a shopid here? Isn't the categoryID, which is assigned to a shopid enough?
 		$where = array(
-			'ProductCategory.categoryid' => $categoryId,
+			'ProductCategory.categoryid:IN' => explode(',',$categoryIds),
 			'ProductCategory.shopid' => $config['shopId'],
 			'vcProduct.shopid' => $config['shopId'],
 			'vcProduct.active:!=' => 2
 		);
-		
+        */
+		$where = array(
+			'ProductCategory.categoryid:IN' => explode(',',$categoryIds),
+			'vcProduct.active:!=' => 2
+		);        
+        
+		if ($config['exclude']){
+		    $where['vcProduct.id:NOT IN'] = explode(',',$config['exclude']);  
+		}
+        
 		if ($config['hideSKU'] == true && $config['parent'] == 0) {
 			$where['vcProduct.parent'] = 0;
 		} elseif ($config['parent'] != 0) {
