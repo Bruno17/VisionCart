@@ -23,6 +23,7 @@ $scriptProperties['hideSKU'] = $modx->getOption('hideSKU', $scriptProperties, tr
 $scriptProperties['exclude'] = $modx->getOption('exclude', $scriptProperties, false);
 $scriptProperties['scheme'] = $modx->getOption('scheme', $scriptProperties, -1);
 $scriptProperties['totalVar'] = $modx->getOption('totalVar', $scriptProperties, 'total');
+$scriptProperties['where'] = $modx->getOption('where', $scriptProperties, '');
 
 // Sorting settings
 $scriptProperties['sort'] = $modx->getOption('sort', $scriptProperties, 'ASC');
@@ -53,10 +54,11 @@ if (isset($router['index']) && in_array($router['index'], explode(',', $scriptPr
     $scriptProperties['sortBy'] = $modx->getOption('index', $router, 'asc');
 }
 
-
+/*
 if ($scriptProperties['parents'] == false) {
     return '';
 }
+*/
 
 foreach ($scriptProperties as $parameter => $property) {
     if (substr($parameter, 0, 3) == 'tpl' && !in_array($parameter, array('tpl', 'tplOdd', 'tplFirst', 'tplLast'))) {
@@ -70,9 +72,11 @@ foreach ($scriptProperties as $parameter => $property) {
     }
 }
 
+/*
 if ($scriptProperties['parents'] == 0) {
     return '';
 }
+*/
 
 $products = array();
 
@@ -87,23 +91,28 @@ $shopId = $modx->visioncart->shop->get('id');
 }
 */
 
-if ($scriptProperties['extraFieldSortBy']) {
-    $stack = $vc->getProducts($scriptProperties['parents'], array(
-        'hideSKU' => $scriptProperties['hideSKU'], 
-        'shopId' => $shopId, 
-        'exclude' => $scriptProperties['exclude']
-    ));
-} else {
-    $stack = $vc->getProducts($scriptProperties['parents'], array(
-        'hideSKU' => $scriptProperties['hideSKU'], 
-        'shopId' => $shopId, 
-        'sortBy' => $scriptProperties['sortBy'], 
-        'sort' => $scriptProperties['sort'],
-        'offset' => $scriptProperties['offset'], 
-        'limit' => $scriptProperties['limit'], 
-        'exclude' => $scriptProperties['exclude']
-    ));
+$shopId = $vc->shop->get('id');
+$params = array();
+if (!empty($scriptProperties['where'])){
+    $params['queryAnd'] = $modx->fromJson($scriptProperties['where']);
 }
+$params['hideSKU']=$scriptProperties['hideSKU'];
+$params['shopId']=$shopId;
+$params['exclude']=$scriptProperties['exclude'];
+
+    
+if ($scriptProperties['extraFieldSortBy']) {
+
+} else {
+    $params['sortBy']=$scriptProperties['sortBy'];
+    $params['sort']=$scriptProperties['sort'];
+    $params['offset']=$scriptProperties['offset'];
+    $params['limit']=$scriptProperties['limit'];
+    $params['exclude']=$scriptProperties['exclude'];
+}
+
+
+$stack = $vc->getProducts($parents,$params);
 
 $modx->setPlaceholder($scriptProperties['totalVar'], $stack['total']);
 

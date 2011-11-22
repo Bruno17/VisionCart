@@ -1305,14 +1305,14 @@ class VisionCart {
    	}
     
     /**
-     * Get all the products within one or more categories
+     * Get all the products within one or more categories or all products within a shop
      *
      * @access public
      * @param int $categoryIds The category ids
      * @param array $config The configuration array
      * @return array The products
      */
-    public function getProducts($categoryIds, $config=array()) {
+    public function getProducts($categoryIds = 0, $config=array()) {
     	$products = array();
 
     	$config['asArray'] = $this->modx->getOption('asArray', $config, false);
@@ -1321,7 +1321,7 @@ class VisionCart {
     	$config['hideSKU'] = $this->modx->getOption('hideSKU', $config, true);
     	$config['sortBy'] = $this->modx->getOption('sortBy', $config, 'ProductCategory.sort');
     	$config['sort'] = $this->modx->getOption('sort', $config, 'ASC');
-    	//$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
+    	$config['shopId'] = $this->modx->getOption('shopId', $config, 0);
     	$config['limit'] = $this->modx->getOption('limit', $config, 0);
     	$config['offset'] = $this->modx->getOption('offset', $config, 0);
         $config['exclude'] = $this->modx->getOption('exclude', $config, false);
@@ -1338,7 +1338,13 @@ class VisionCart {
     		unset($shop);
     	}
         */
+
+        if (empty($categoryIds) && empty($config['shopId'])){
+            return false;
+        }
     	
+        
+        
         $query = $this->modx->newQuery('vcProduct');
 		$query->innerJoin('vcProductCategory', 'ProductCategory', 'ProductCategory.productid = vcProduct.id');
 		$query->select(array(
@@ -1356,9 +1362,17 @@ class VisionCart {
 		);
         */
 		$where = array(
-			'ProductCategory.categoryid:IN' => explode(',',$categoryIds),
 			'vcProduct.active:!=' => 2
-		);        
+		);
+        
+        if (!empty($config['shopId'])){
+           $where['ProductCategory.shopid'] = $config['shopId'];
+           $where['vcProduct.shopid'] = $config['shopId'];   
+        }
+        
+        if (!empty($categoryIds)){
+           $where['ProductCategory.categoryid:IN'] = explode(',',$categoryIds);   
+        }                
         
 		if ($config['exclude']){
 		    $where['vcProduct.id:NOT IN'] = explode(',',$config['exclude']);  
@@ -1384,30 +1398,32 @@ class VisionCart {
 		
 		$query->sortby($config['sortBy'], $config['sort']);
 		
-		$collection = $this->modx->getCollection('vcProduct', $query);
-		
-		foreach($collection as $product) {
-			if (!$this->isPublished($product)) {
-				continue;	
-			}
+		if ($collection = $this->modx->getCollection('vcProduct', $query)){
+		    foreach($collection as $product) {
+			    if (!$this->isPublished($product)) {
+				    continue;	
+			    }
 			
-			// Calculate discounts
-			$productPrice = $this->calculateProductPrice($product, true);
-			$product->set('display', array(
-				'price' => array(
-					'in' => $productPrice['in'],
-					'ex' => $productPrice['ex']
-				)
-			));
-			$product->set('pricein', $productPrice['in']);
-			$product->set('priceex', $productPrice['ex']);
+			    // Calculate discounts
+			    $productPrice = $this->calculateProductPrice($product, true);
+			    $product->set('display', array(
+				    'price' => array(
+					    'in' => $productPrice['in'],
+					    'ex' => $productPrice['ex']
+				    )
+			    ));
+			    $product->set('pricein', $productPrice['in']);
+			    $product->set('priceex', $productPrice['ex']);
 			
-			if ($config['asArray'] == true) {
-				$products[] = $product->toArray();
-			} else {
-				$products[] = $product;
-			}
+			    if ($config['asArray'] == true) {
+				    $products[] = $product->toArray();
+			    } else {
+				    $products[] = $product;
+			    }
+		    }		  
 		}
+		
+
 		
 		return array(
 			'data' => $products,
